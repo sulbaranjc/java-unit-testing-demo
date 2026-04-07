@@ -145,4 +145,34 @@ class CalculadoraTest {
         assertTrue(resultado, "0 es par, debe devolver true");
     }
 
+    // ─────────────────────────────────────────────
+    // buscarOperacion()
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("buscarOperacion con nombre conocido devuelve el nombre")
+    void buscarOperacion_operacionExistente_noEsNull() {
+        // Arrange
+        String nombre = "sumar";
+
+        // Act
+        String resultado = calculadora.buscarOperacion(nombre);
+
+        // Assert: una operación conocida debe devolver un valor, nunca null
+        assertNotNull(resultado, "Una operación conocida no debe devolver null");
+    }
+
+    @Test
+    @DisplayName("buscarOperacion con nombre desconocido devuelve null")
+    void buscarOperacion_operacionInexistente_esNull() {
+        // Arrange
+        String nombre = "dividir_por_cero";
+
+        // Act
+        String resultado = calculadora.buscarOperacion(nombre);
+
+        // Assert: una operación desconocida debe devolver null (no encontrada)
+        assertNull(resultado, "Una operación desconocida debe devolver null");
+    }
+
 }

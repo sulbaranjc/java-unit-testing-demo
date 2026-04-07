@@ -144,16 +144,25 @@ public class Calculadora {
     public boolean esPar(int numero) {
         return numero % 2 == 0;
     }
+
+    public String buscarOperacion(String nombre) {
+        if (nombre.equals("sumar") || nombre.equals("restar") ||
+            nombre.equals("multiplicar") || nombre.equals("dividir")) {
+            return nombre;
+        }
+        return null;
+    }
 }
 ```
 
-Esta es la clase que queremos verificar. Tiene tres métodos:
+Esta es la clase que queremos verificar. Cada método introduce una aserción distinta:
 
 | Método | Qué hace | Aserción usada |
 |---|---|---|
 | `sumar` | Suma dos enteros. Resultado predecible | `assertEquals` |
 | `generarNumeroAleatorio` | Devuelve un entero aleatorio. Resultado impredecible | `assertNotEquals` |
 | `esPar` | Devuelve `true` o `false`. Resultado booleano | `assertTrue` / `assertFalse` |
+| `buscarOperacion` | Devuelve el nombre si existe, `null` si no. | `assertNotNull` / `assertNull` |
 
 > **Nota pedagógica:** Cada método introduce una aserción distinta con una justificación real.
 
@@ -350,6 +359,40 @@ void esPar_cero_retornaTrue() {
 
 Fíjate en el tercer test: el `0` es un **caso límite** clásico. Muchos alumnos dudan si el cero es par o impar — el test lo responde de forma objetiva e inapelable.
 
+#### Con `assertNotNull` y `assertNull` — cuando el resultado puede no existir
+
+En Java es habitual que un método devuelva `null` para indicar "no encontrado". `assertNull` y `assertNotNull` comprueban exactamente eso:
+
+```java
+@Test
+@DisplayName("buscarOperacion con nombre conocido devuelve el nombre")
+void buscarOperacion_operacionExistente_noEsNull() {
+    // Arrange
+    String nombre = "sumar";
+
+    // Act
+    String resultado = calculadora.buscarOperacion(nombre);
+
+    // Assert: una operación conocida debe devolver un valor, nunca null
+    assertNotNull(resultado, "Una operación conocida no debe devolver null");
+}
+
+@Test
+@DisplayName("buscarOperacion con nombre desconocido devuelve null")
+void buscarOperacion_operacionInexistente_esNull() {
+    // Arrange
+    String nombre = "dividir_por_cero";
+
+    // Act
+    String resultado = calculadora.buscarOperacion(nombre);
+
+    // Assert: una operación desconocida debe devolver null (no encontrada)
+    assertNull(resultado, "Una operación desconocida debe devolver null");
+}
+```
+
+Este patrón "devuelve `null` si no existe" es muy frecuente en Java. Lo verás continuamente al buscar elementos en listas, mapas o bases de datos. Y es también la causa del error más famoso de Java: el `NullPointerException`, que ocurre cuando intentas usar un objeto que es `null` sin comprobarlo antes.
+
 #### ¿Cuándo usar cada aserción?
 
 | Aserción | Úsala cuando... | Ejemplo real |
@@ -358,8 +401,10 @@ Fíjate en el tercer test: el `0` es un **caso límite** clásico. Muchos alumno
 | `assertNotEquals` | no conoces el valor exacto, pero sabes lo que **no** debe ocurrir | números aleatorios, tokens de sesión, hashes |
 | `assertTrue` | el método debe devolver `true` | validaciones, comprobaciones de estado |
 | `assertFalse` | el método debe devolver `false` | validaciones negativas, comprobaciones de estado |
+| `assertNotNull` | el método debe devolver un objeto real, no vacío | buscar un elemento que existe |
+| `assertNull` | el método debe indicar "no encontrado" con `null` | buscar un elemento que no existe |
 
-> **Reflexión para el aula:** ¿Qué otros casos podrías añadir a `esPar`? Pista: ¿qué pasa con números negativos como `-2` o `-3`?
+> **Reflexión para el aula:** ¿Qué pasaría si llamaras a `resultado.length()` sin comprobar si `resultado` es `null`? Pruébalo.
 
 ---
 

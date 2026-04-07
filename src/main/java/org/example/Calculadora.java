@@ -12,4 +12,12 @@ public class Calculadora {
     public boolean esPar(int numero) {
         return numero % 2 == 0;
     }
+
+    public String buscarOperacion(String nombre) {
+        if (nombre.equals("sumar") || nombre.equals("restar") ||
+            nombre.equals("multiplicar") || nombre.equals("dividir")) {
+            return nombre;
+        }
+        return null;
+    }
 }
