@@ -140,15 +140,22 @@ public class Calculadora {
     public int generarNumeroAleatorio(int limite) {
         return (int) (Math.random() * limite);
     }
+
+    public boolean esPar(int numero) {
+        return numero % 2 == 0;
+    }
 }
 ```
 
-Esta es la clase que queremos verificar. Tiene dos métodos:
+Esta es la clase que queremos verificar. Tiene tres métodos:
 
-- `sumar` — devuelve la suma de dos enteros. Resultado predecible → usamos `assertEquals`.
-- `generarNumeroAleatorio` — devuelve un entero aleatorio entre 0 y `limite - 1`. Resultado impredecible → usamos `assertNotEquals`.
+| Método | Qué hace | Aserción usada |
+|---|---|---|
+| `sumar` | Suma dos enteros. Resultado predecible | `assertEquals` |
+| `generarNumeroAleatorio` | Devuelve un entero aleatorio. Resultado impredecible | `assertNotEquals` |
+| `esPar` | Devuelve `true` o `false`. Resultado booleano | `assertTrue` / `assertFalse` |
 
-> **Nota pedagógica:** La coexistencia de estos dos métodos ilustra perfectamente cuándo usar cada tipo de aserción.
+> **Nota pedagógica:** Cada método introduce una aserción distinta con una justificación real.
 
 ---
 
@@ -296,14 +303,63 @@ void generarNumeroAleatorio_dosLlamadas_noSonIguales() {
 
 No sabemos qué número devolverá `generarNumeroAleatorio`, así que `assertEquals` no aplica. Lo que sí podemos afirmar es que dos llamadas consecutivas **no deben coincidir**, porque eso indicaría que el generador está roto (por ejemplo, si alguien usara siempre la misma semilla).
 
-#### ¿Cuándo usar cada uno?
+#### Con `assertTrue` y `assertFalse` — cuando el resultado es booleano
+
+Cuando el método devuelve `true` o `false`, usar `assertEquals(true, resultado)` funciona pero es redundante. La forma limpia y expresiva es `assertTrue` y `assertFalse`:
+
+```java
+@Test
+@DisplayName("esPar con número par devuelve true")
+void esPar_numeroPar_retornaTrue() {
+    // Arrange
+    int numero = 4;
+
+    // Act
+    boolean resultado = calculadora.esPar(numero);
+
+    // Assert
+    assertTrue(resultado, "4 es par, debe devolver true");
+}
+
+@Test
+@DisplayName("esPar con número impar devuelve false")
+void esPar_numeroImpar_retornaFalse() {
+    // Arrange
+    int numero = 3;
+
+    // Act
+    boolean resultado = calculadora.esPar(numero);
+
+    // Assert
+    assertFalse(resultado, "3 es impar, debe devolver false");
+}
+
+@Test
+@DisplayName("esPar con cero devuelve true (caso límite)")
+void esPar_cero_retornaTrue() {
+    // Arrange
+    int numero = 0;
+
+    // Act
+    boolean resultado = calculadora.esPar(numero);
+
+    // Assert: el 0 es par porque 0 % 2 == 0
+    assertTrue(resultado, "0 es par, debe devolver true");
+}
+```
+
+Fíjate en el tercer test: el `0` es un **caso límite** clásico. Muchos alumnos dudan si el cero es par o impar — el test lo responde de forma objetiva e inapelable.
+
+#### ¿Cuándo usar cada aserción?
 
 | Aserción | Úsala cuando... | Ejemplo real |
 |---|---|---|
 | `assertEquals` | conoces el valor exacto esperado | operaciones matemáticas, parseo de fechas |
 | `assertNotEquals` | no conoces el valor exacto, pero sabes lo que **no** debe ocurrir | números aleatorios, tokens de sesión, hashes |
+| `assertTrue` | el método debe devolver `true` | validaciones, comprobaciones de estado |
+| `assertFalse` | el método debe devolver `false` | validaciones negativas, comprobaciones de estado |
 
-> **Reflexión para el aula:** ¿Qué otros casos podrías añadir a `sumar`? Pista: ¿qué pasa con `Integer.MAX_VALUE + 1`?
+> **Reflexión para el aula:** ¿Qué otros casos podrías añadir a `esPar`? Pista: ¿qué pasa con números negativos como `-2` o `-3`?
 
 ---
 

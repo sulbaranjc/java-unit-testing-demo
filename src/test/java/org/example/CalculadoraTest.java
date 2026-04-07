@@ -102,4 +102,47 @@ class CalculadoraTest {
         assertNotEquals(primera, segunda, "Un generador aleatorio no debe repetir siempre el mismo valor");
     }
 
+    // ─────────────────────────────────────────────
+    // esPar()
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("esPar con número par devuelve true")
+    void esPar_numeroPar_retornaTrue() {
+        // Arrange
+        int numero = 4;
+
+        // Act
+        boolean resultado = calculadora.esPar(numero);
+
+        // Assert
+        assertTrue(resultado, "4 es par, debe devolver true");
+    }
+
+    @Test
+    @DisplayName("esPar con número impar devuelve false")
+    void esPar_numeroImpar_retornaFalse() {
+        // Arrange
+        int numero = 3;
+
+        // Act
+        boolean resultado = calculadora.esPar(numero);
+
+        // Assert
+        assertFalse(resultado, "3 es impar, debe devolver false");
+    }
+
+    @Test
+    @DisplayName("esPar con cero devuelve true (caso límite)")
+    void esPar_cero_retornaTrue() {
+        // Arrange
+        int numero = 0;
+
+        // Act
+        boolean resultado = calculadora.esPar(numero);
+
+        // Assert: el 0 es par porque 0 % 2 == 0
+        assertTrue(resultado, "0 es par, debe devolver true");
+    }
+
 }
