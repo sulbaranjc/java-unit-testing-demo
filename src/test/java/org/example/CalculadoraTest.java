@@ -83,4 +83,23 @@ class CalculadoraTest {
         // Assert
         assertEquals(9, resultado, "9 + 0 debe ser 9");
     }
+
+    // ─────────────────────────────────────────────
+    // generarNumeroAleatorio()
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("dos llamadas consecutivas no deben devolver siempre el mismo número")
+    void generarNumeroAleatorio_dosLlamadas_noSonIguales() {
+        // Arrange - límite grande para que la probabilidad de colisión sea mínima
+        int limite = 1_000_000;
+
+        // Act
+        int primera = calculadora.generarNumeroAleatorio(limite);
+        int segunda = calculadora.generarNumeroAleatorio(limite);
+
+        // Assert: si ambas llamadas devuelven lo mismo, el generador está roto
+        assertNotEquals(primera, segunda, "Un generador aleatorio no debe repetir siempre el mismo valor");
+    }
+
 }

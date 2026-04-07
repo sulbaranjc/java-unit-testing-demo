@@ -16,6 +16,8 @@
 7. [Cómo ejecutar los tests en IntelliJ](#7-cómo-ejecutar-los-tests-en-intellij)
 8. [Ejercicios propuestos](#8-ejercicios-propuestos)
 
+> **Tests implementados:** `assertEquals` (sumar) · `assertNotEquals` (generarNumeroAleatorio)
+
 ---
 
 ## 1. ¿Qué es una prueba unitaria?
@@ -134,12 +136,19 @@ public class Calculadora {
     public int sumar(int a, int b) {
         return a + b;
     }
+
+    public int generarNumeroAleatorio(int limite) {
+        return (int) (Math.random() * limite);
+    }
 }
 ```
 
-Esta es la clase que queremos verificar. Actualmente tiene un solo método, `sumar`, que recibe dos enteros y devuelve su suma.
+Esta es la clase que queremos verificar. Tiene dos métodos:
 
-> **Nota pedagógica:** En un proyecto real la clase tendría muchos más métodos. Aquí la mantenemos simple para que el foco esté en los tests, no en la lógica de negocio.
+- `sumar` — devuelve la suma de dos enteros. Resultado predecible → usamos `assertEquals`.
+- `generarNumeroAleatorio` — devuelve un entero aleatorio entre 0 y `limite - 1`. Resultado impredecible → usamos `assertNotEquals`.
+
+> **Nota pedagógica:** La coexistencia de estos dos métodos ilustra perfectamente cuándo usar cada tipo de aserción.
 
 ---
 
@@ -254,18 +263,47 @@ Esta convención hace que el nombre del test sea casi una frase en inglés técn
 
 ---
 
-### 6.6 Los cuatro casos de prueba — ¿Por qué estos cuatro?
+### 6.6 Los casos de prueba — assertEquals vs assertNotEquals
 
-Un buen suite de tests no prueba solo "el caso feliz" (que todo funcione bien). También prueba los **casos límite** y los **casos adversos**.
+Un buen suite de tests no prueba solo "el caso feliz". También prueba los **casos límite**, los **casos adversos** y los casos donde el resultado **no es predecible** de antemano.
+
+#### Con `assertEquals` — cuando conoces el resultado exacto
 
 ```
-sumar(3, 4)    → caso normal: dos positivos          ✅ esperamos 7
-sumar(10, -3)  → caso adverso: un número negativo    ✅ esperamos 7
-sumar(-5, -2)  → caso adverso: ambos negativos       ✅ esperamos -7
-sumar(9, 0)    → caso límite: el elemento neutro     ✅ esperamos 9
+sumar(3, 4)    → caso normal: dos positivos          ✅ esperamos exactamente 7
+sumar(10, -3)  → caso adverso: un número negativo    ✅ esperamos exactamente 7
+sumar(-5, -2)  → caso adverso: ambos negativos       ✅ esperamos exactamente -7
+sumar(9, 0)    → caso límite: el elemento neutro     ✅ esperamos exactamente 9
 ```
 
-> **Reflexión para el aula:** ¿Qué otros casos podrías añadir? Pista: ¿qué pasa con `Integer.MAX_VALUE + 1`?
+#### Con `assertNotEquals` — cuando el resultado es impredecible
+
+```java
+@Test
+@DisplayName("dos llamadas consecutivas no deben devolver siempre el mismo número")
+void generarNumeroAleatorio_dosLlamadas_noSonIguales() {
+    // Arrange
+    int limite = 1_000_000;
+
+    // Act
+    int primera = calculadora.generarNumeroAleatorio(limite);
+    int segunda  = calculadora.generarNumeroAleatorio(limite);
+
+    // Assert: no podemos saber qué número saldrá, pero sí que NO deben ser siempre iguales
+    assertNotEquals(primera, segunda, "Un generador aleatorio no debe repetir siempre el mismo valor");
+}
+```
+
+No sabemos qué número devolverá `generarNumeroAleatorio`, así que `assertEquals` no aplica. Lo que sí podemos afirmar es que dos llamadas consecutivas **no deben coincidir**, porque eso indicaría que el generador está roto (por ejemplo, si alguien usara siempre la misma semilla).
+
+#### ¿Cuándo usar cada uno?
+
+| Aserción | Úsala cuando... | Ejemplo real |
+|---|---|---|
+| `assertEquals` | conoces el valor exacto esperado | operaciones matemáticas, parseo de fechas |
+| `assertNotEquals` | no conoces el valor exacto, pero sabes lo que **no** debe ocurrir | números aleatorios, tokens de sesión, hashes |
+
+> **Reflexión para el aula:** ¿Qué otros casos podrías añadir a `sumar`? Pista: ¿qué pasa con `Integer.MAX_VALUE + 1`?
 
 ---
 
