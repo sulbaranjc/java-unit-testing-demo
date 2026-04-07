@@ -159,6 +159,11 @@ public class Calculadora {
         }
         return a / b;
     }
+
+    public int sumarConRetraso(int a, int b) throws InterruptedException {
+        Thread.sleep(100); // simula 100ms de trabajo (p.ej. consulta a base de datos)
+        return a + b;
+    }
 }
 ```
 
@@ -171,6 +176,7 @@ Esta es la clase que queremos verificar. Cada método introduce una aserción di
 | `esPar` | Devuelve `true` o `false`. Resultado booleano | `assertTrue` / `assertFalse` |
 | `buscarOperacion` | Devuelve el nombre si existe, `null` si no | `assertNotNull` / `assertNull` |
 | `dividir` | Divide dos enteros o lanza excepción si `b == 0` | `assertEquals` + `assertThrows` |
+| `sumarConRetraso` | Suma con retardo de 100ms. Introduce la dimensión del tiempo | `assertTimeout` |
 
 > **Nota pedagógica:** Cada método introduce una aserción distinta con una justificación real.
 
@@ -480,6 +486,57 @@ Fíjate también en que dentro de `assertAll` se pueden mezclar distintos tipos 
 | `assertNull` | el método debe indicar "no encontrado" con `null` | buscar un elemento que no existe |
 | `assertThrows` | el método debe lanzar una excepción ante una entrada inválida | división por cero, índice fuera de rango |
 | `assertAll` | quieres verificar varias propiedades y ver todos los fallos de golpe | validar múltiples campos de un objeto |
+
+#### Con `assertTimeout` — cuando el método debe terminar en un tiempo máximo
+
+`assertTimeout` introduce la dimensión del **tiempo** en los tests. Verifica que el código se ejecuta dentro de un límite de duración. Si lo supera, el test falla.
+
+```java
+@Test
+@DisplayName("sumarConRetraso termina dentro del tiempo límite")
+void sumarConRetraso_terminaDentroDelTiempoLimite() {
+    // Assert: el método debe completarse en menos de 500ms.
+    // La lambda envuelve la llamada porque assertTimeout necesita medirla.
+    assertTimeout(
+        Duration.ofMillis(500),
+        () -> calculadora.sumarConRetraso(3, 4),
+        "El método debe terminar en menos de 500ms"
+    );
+}
+
+@Test
+@Disabled("Test de ejemplo didáctico: falla a propósito para mostrar cómo se ve un timeout en IntelliJ")
+@DisplayName("[EJEMPLO] sumarConRetraso supera el tiempo límite — falla a propósito")
+void sumarConRetraso_superaElTiempoLimite_fallaAProposito() {
+    // El límite (50ms) es menor que el retraso real (100ms) → el test FALLA.
+    // Elimina @Disabled y ejecútalo para ver el mensaje de timeout en IntelliJ.
+    assertTimeout(
+        Duration.ofMillis(50),
+        () -> calculadora.sumarConRetraso(3, 4),
+        "Este test está diseñado para fallar: 50ms < 100ms de retraso"
+    );
+}
+```
+
+El segundo test usa `@Disabled`, una anotación nueva que le dice a JUnit que **ignore** ese test al ejecutar el suite. Lo dejamos en el código como ejemplo didáctico: elimina `@Disabled`, ejecútalo, y observa en IntelliJ el mensaje de error por timeout.
+
+`Duration.ofMillis(500)` es la forma en que Java expresa duraciones de tiempo. También existen `Duration.ofSeconds(2)`, `Duration.ofMinutes(1)`, etc.
+
+**¿Cuándo se usa en el mundo real?** Cuando el código llama a servicios externos — bases de datos, APIs, ficheros — y necesitas garantizar que nunca tarda más de X tiempo. Si el tiempo se supera, el test te alerta de que algo ha ido mal en el entorno o en el propio código.
+
+#### Tabla completa de aserciones
+
+| Aserción | Úsala cuando... | Ejemplo real |
+|---|---|---|
+| `assertEquals` | conoces el valor exacto esperado | operaciones matemáticas, parseo de fechas |
+| `assertNotEquals` | no conoces el valor exacto, pero sabes lo que **no** debe ocurrir | números aleatorios, tokens de sesión, hashes |
+| `assertTrue` | el método debe devolver `true` | validaciones, comprobaciones de estado |
+| `assertFalse` | el método debe devolver `false` | validaciones negativas, comprobaciones de estado |
+| `assertNotNull` | el método debe devolver un objeto real, no vacío | buscar un elemento que existe |
+| `assertNull` | el método debe indicar "no encontrado" con `null` | buscar un elemento que no existe |
+| `assertThrows` | el método debe lanzar una excepción ante entrada inválida | división por cero, índice fuera de rango |
+| `assertAll` | quieres verificar varias propiedades y ver todos los fallos de golpe | validar múltiples campos de un objeto |
+| `assertTimeout` | el método debe terminar dentro de un tiempo máximo | llamadas a base de datos, APIs externas |
 
 > **Reflexión para el aula:** ¿Qué pasaría si `dividir` no tuviera el `if (b == 0)`? ¿Lanzaría igualmente una excepción? ¿Cuál? ¿Sería la misma que estamos comprobando?
 

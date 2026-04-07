@@ -27,4 +27,9 @@ public class Calculadora {
         }
         return a / b;
     }
+
+    public int sumarConRetraso(int a, int b) throws InterruptedException {
+        Thread.sleep(100); // simula 100ms de trabajo (p.ej. consulta a base de datos)
+        return a + b;
+    }
 }

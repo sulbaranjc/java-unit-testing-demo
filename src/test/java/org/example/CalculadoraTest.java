@@ -1,8 +1,11 @@
 package org.example;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -227,6 +230,35 @@ class CalculadoraTest {
             () -> assertTrue(resultado > 0,       "debe ser positivo"),
             () -> assertTrue(resultado % 2 == 0,  "debe ser par"),
             () -> assertNotEquals(0, resultado,   "no debe ser cero")
+        );
+    }
+
+    // ─────────────────────────────────────────────
+    // sumarConRetraso() — assertTimeout
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("sumarConRetraso termina dentro del tiempo límite")
+    void sumarConRetraso_terminaDentroDelTiempoLimite() {
+        // Assert: el método debe completarse en menos de 500ms.
+        // La lambda envuelve la llamada porque assertTimeout necesita medirla.
+        assertTimeout(
+            Duration.ofMillis(500),
+            () -> calculadora.sumarConRetraso(3, 4),
+            "El método debe terminar en menos de 500ms"
+        );
+    }
+
+    @Test
+    @Disabled("Test de ejemplo didáctico: falla a propósito para mostrar cómo se ve un timeout en IntelliJ")
+    @DisplayName("[EJEMPLO] sumarConRetraso supera el tiempo límite — falla a propósito")
+    void sumarConRetraso_superaElTiempoLimite_fallaAProposito() {
+        // El límite (50ms) es menor que el retraso real (100ms) → el test FALLA.
+        // Elimina @Disabled y ejecútalo para ver el mensaje de timeout en IntelliJ.
+        assertTimeout(
+            Duration.ofMillis(50),
+            () -> calculadora.sumarConRetraso(3, 4),
+            "Este test está diseñado para fallar: 50ms < 100ms de retraso"
         );
     }
 
