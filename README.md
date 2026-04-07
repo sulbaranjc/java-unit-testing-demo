@@ -439,6 +439,35 @@ void dividir_entreCero_lanzaArithmeticException() {
 
 > **Concepto clave:** probar que un método falla correctamente es tan importante como probar que funciona bien. Un método que lanza una excepción genérica o no lanza ninguna ante una entrada inválida es un método con un bug.
 
+#### Con `assertAll` — cuando quieres comprobar varias propiedades a la vez
+
+Con aserciones normales, en cuanto una falla el test se detiene y las siguientes no se ejecutan. `assertAll` ejecuta **todas** aunque alguna falle, y al final te muestra un informe con todos los errores juntos.
+
+```java
+@Test
+@DisplayName("el resultado de sumar(6, 4) cumple varias propiedades a la vez")
+void sumar_resultado_cumpleVariasPropiedades() {
+    // Arrange
+    int a = 6, b = 4;
+
+    // Act
+    int resultado = calculadora.sumar(a, b);
+
+    // Assert: assertAll ejecuta TODAS las comprobaciones aunque alguna falle,
+    // así ves de golpe cuántas y cuáles están rotas.
+    assertAll("propiedades del resultado de sumar(6, 4)",
+        () -> assertEquals(10, resultado,     "debe ser 10"),
+        () -> assertTrue(resultado > 0,       "debe ser positivo"),
+        () -> assertTrue(resultado % 2 == 0,  "debe ser par"),
+        () -> assertNotEquals(0, resultado,   "no debe ser cero")
+    );
+}
+```
+
+**¿Qué pasa si introduces un bug?** Cambia `sumar` para que devuelva `resultado - 1`. Sin `assertAll`, el test pararía en la primera aserción fallida y nunca sabrías cuántas más están rotas. Con `assertAll`, el informe mostrará los cuatro fallos a la vez.
+
+Fíjate también en que dentro de `assertAll` se pueden mezclar distintos tipos de aserciones (`assertEquals`, `assertTrue`, `assertNotEquals`...). Cada una va envuelta en su propia lambda `() ->`.
+
 #### ¿Cuándo usar cada aserción?
 
 | Aserción | Úsala cuando... | Ejemplo real |
@@ -450,6 +479,7 @@ void dividir_entreCero_lanzaArithmeticException() {
 | `assertNotNull` | el método debe devolver un objeto real, no vacío | buscar un elemento que existe |
 | `assertNull` | el método debe indicar "no encontrado" con `null` | buscar un elemento que no existe |
 | `assertThrows` | el método debe lanzar una excepción ante una entrada inválida | división por cero, índice fuera de rango |
+| `assertAll` | quieres verificar varias propiedades y ver todos los fallos de golpe | validar múltiples campos de un objeto |
 
 > **Reflexión para el aula:** ¿Qué pasaría si `dividir` no tuviera el `if (b == 0)`? ¿Lanzaría igualmente una excepción? ¿Cuál? ¿Sería la misma que estamos comprobando?
 

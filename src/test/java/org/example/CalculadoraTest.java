@@ -207,4 +207,27 @@ class CalculadoraTest {
         );
     }
 
+    // ─────────────────────────────────────────────
+    // assertAll — múltiples propiedades de sumar()
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("el resultado de sumar(6, 4) cumple varias propiedades a la vez")
+    void sumar_resultado_cumpleVariasPropiedades() {
+        // Arrange
+        int a = 6, b = 4;
+
+        // Act
+        int resultado = calculadora.sumar(a, b);
+
+        // Assert: assertAll ejecuta TODAS las comprobaciones aunque alguna falle,
+        // así ves de golpe cuántas y cuáles están rotas.
+        assertAll("propiedades del resultado de sumar(6, 4)",
+            () -> assertEquals(10, resultado,     "debe ser 10"),
+            () -> assertTrue(resultado > 0,       "debe ser positivo"),
+            () -> assertTrue(resultado % 2 == 0,  "debe ser par"),
+            () -> assertNotEquals(0, resultado,   "no debe ser cero")
+        );
+    }
+
 }
