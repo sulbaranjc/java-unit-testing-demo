@@ -175,4 +175,36 @@ class CalculadoraTest {
         assertNull(resultado, "Una operación desconocida debe devolver null");
     }
 
+    // ─────────────────────────────────────────────
+    // dividir()
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("dividir dos positivos devuelve el cociente correcto")
+    void dividir_dosPositivos_retornaCociente() {
+        // Arrange
+        int a = 8, b = 2;
+
+        // Act
+        int resultado = calculadora.dividir(a, b);
+
+        // Assert
+        assertEquals(4, resultado, "8 / 2 debe ser 4");
+    }
+
+    @Test
+    @DisplayName("dividir entre cero lanza ArithmeticException")
+    void dividir_entreCero_lanzaArithmeticException() {
+        // Arrange
+        int a = 10, b = 0;
+
+        // Act + Assert: la lambda () -> es el código que debe lanzar la excepción.
+        // assertThrows verifica que dicha excepción se produce. Si NO se lanza, el test FALLA.
+        assertThrows(
+            ArithmeticException.class,
+            () -> calculadora.dividir(a, b),
+            "Dividir por cero debe lanzar ArithmeticException"
+        );
+    }
+
 }

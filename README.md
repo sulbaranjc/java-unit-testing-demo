@@ -152,6 +152,13 @@ public class Calculadora {
         }
         return null;
     }
+
+    public int dividir(int a, int b) {
+        if (b == 0) {
+            throw new ArithmeticException("No se puede dividir por cero");
+        }
+        return a / b;
+    }
 }
 ```
 
@@ -162,7 +169,8 @@ Esta es la clase que queremos verificar. Cada método introduce una aserción di
 | `sumar` | Suma dos enteros. Resultado predecible | `assertEquals` |
 | `generarNumeroAleatorio` | Devuelve un entero aleatorio. Resultado impredecible | `assertNotEquals` |
 | `esPar` | Devuelve `true` o `false`. Resultado booleano | `assertTrue` / `assertFalse` |
-| `buscarOperacion` | Devuelve el nombre si existe, `null` si no. | `assertNotNull` / `assertNull` |
+| `buscarOperacion` | Devuelve el nombre si existe, `null` si no | `assertNotNull` / `assertNull` |
+| `dividir` | Divide dos enteros o lanza excepción si `b == 0` | `assertEquals` + `assertThrows` |
 
 > **Nota pedagógica:** Cada método introduce una aserción distinta con una justificación real.
 
@@ -393,6 +401,44 @@ void buscarOperacion_operacionInexistente_esNull() {
 
 Este patrón "devuelve `null` si no existe" es muy frecuente en Java. Lo verás continuamente al buscar elementos en listas, mapas o bases de datos. Y es también la causa del error más famoso de Java: el `NullPointerException`, que ocurre cuando intentas usar un objeto que es `null` sin comprobarlo antes.
 
+#### Con `assertThrows` — cuando el método debe lanzar una excepción
+
+Hasta ahora todos los tests verificaban que el método devuelve algo. `assertThrows` es diferente: verifica que el método **falla de forma controlada**, lanzando la excepción correcta.
+
+```java
+@Test
+@DisplayName("dividir dos positivos devuelve el cociente correcto")
+void dividir_dosPositivos_retornaCociente() {
+    // Arrange
+    int a = 8, b = 2;
+
+    // Act
+    int resultado = calculadora.dividir(a, b);
+
+    // Assert
+    assertEquals(4, resultado, "8 / 2 debe ser 4");
+}
+
+@Test
+@DisplayName("dividir entre cero lanza ArithmeticException")
+void dividir_entreCero_lanzaArithmeticException() {
+    // Arrange
+    int a = 10, b = 0;
+
+    // Act + Assert: la lambda () -> es el código que debe lanzar la excepción.
+    // assertThrows verifica que dicha excepción se produce. Si NO se lanza, el test FALLA.
+    assertThrows(
+        ArithmeticException.class,
+        () -> calculadora.dividir(a, b),
+        "Dividir por cero debe lanzar ArithmeticException"
+    );
+}
+```
+
+**La parte más nueva aquí es la lambda `() ->`**. No es más que una forma de envolver el código que queremos ejecutar, para que `assertThrows` pueda interceptar la excepción si se lanza. Puedes leerlo como: *"ejecuta esto, y comprueba que lanza una `ArithmeticException`"*.
+
+> **Concepto clave:** probar que un método falla correctamente es tan importante como probar que funciona bien. Un método que lanza una excepción genérica o no lanza ninguna ante una entrada inválida es un método con un bug.
+
 #### ¿Cuándo usar cada aserción?
 
 | Aserción | Úsala cuando... | Ejemplo real |
@@ -403,8 +449,9 @@ Este patrón "devuelve `null` si no existe" es muy frecuente en Java. Lo verás 
 | `assertFalse` | el método debe devolver `false` | validaciones negativas, comprobaciones de estado |
 | `assertNotNull` | el método debe devolver un objeto real, no vacío | buscar un elemento que existe |
 | `assertNull` | el método debe indicar "no encontrado" con `null` | buscar un elemento que no existe |
+| `assertThrows` | el método debe lanzar una excepción ante una entrada inválida | división por cero, índice fuera de rango |
 
-> **Reflexión para el aula:** ¿Qué pasaría si llamaras a `resultado.length()` sin comprobar si `resultado` es `null`? Pruébalo.
+> **Reflexión para el aula:** ¿Qué pasaría si `dividir` no tuviera el `if (b == 0)`? ¿Lanzaría igualmente una excepción? ¿Cuál? ¿Sería la misma que estamos comprobando?
 
 ---
 
